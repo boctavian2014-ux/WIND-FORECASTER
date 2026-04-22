@@ -4,6 +4,14 @@ from pathlib import Path
 import sys
 from typing import Any
 
+# Ensure both the project root and apps/api are in sys.path before any local
+# imports so that `from deps import ...` and `from schemas.* import ...` resolve
+# correctly whether this module is loaded standalone or as apps.api.routers.research.
+_API_ROOT = Path(__file__).resolve().parents[1]
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(_PROJECT_ROOT))
+sys.path.insert(0, str(_API_ROOT))
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -18,9 +26,7 @@ from schemas.research import (
 )
 from schemas.research_v2 import BacktestCompareRequestV2, BacktestCompareResponseV2
 
-ROOT = Path(__file__).resolve().parents[3]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+ROOT = _PROJECT_ROOT
 
 from services.backtest.engine import run_persistence_backtest, run_persisted_model_backtest
 from services.backtest.metrics import build_strategy_evaluation

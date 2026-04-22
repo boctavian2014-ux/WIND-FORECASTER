@@ -4,8 +4,11 @@ import sys
 from fastapi import FastAPI
 
 API_ROOT = Path(__file__).resolve().parent
-if str(API_ROOT) not in sys.path:
-    sys.path.insert(0, str(API_ROOT))
+# Ensure apps/api is always first in sys.path so that bare imports like
+# `from deps import get_db` and `from schemas.research import ...` resolve
+# correctly regardless of how the module is loaded (e.g. as apps.api.main
+# via PYTHONPATH=/app with uvicorn).
+sys.path.insert(0, str(API_ROOT))
 
 from routers import models, research
 
