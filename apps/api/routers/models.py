@@ -4,6 +4,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 import sys
 
+# Ensure both the project root and apps/api are in sys.path before any local
+# imports so that `from deps import ...` and `from schemas.* import ...` resolve
+# correctly whether this module is loaded standalone or as apps.api.routers.models.
+_API_ROOT = Path(__file__).resolve().parents[1]
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(_PROJECT_ROOT))
+sys.path.insert(0, str(_API_ROOT))
+
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
@@ -12,9 +20,7 @@ from sqlalchemy.orm import Session
 from deps import get_db
 from schemas.models import PredictRequest, PredictResponse, TrainBaselineModelRequest, TrainBaselineModelResponse
 
-ROOT = Path(__file__).resolve().parents[3]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+ROOT = _PROJECT_ROOT
 
 from services.features.dataset_builder import build_dataset
 from services.models.logreg_model import LogisticDirectionModel, predict_with_model
